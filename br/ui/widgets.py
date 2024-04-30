@@ -34,9 +34,8 @@ class BookReader(QTextBrowser):
         self.setHtml(''.join(list(get_html_content(self.book))))
 
     def scroll_to_anchor(self, url: QUrl):
-        print('Url:', url)
         try:
-            _, anchor = url.url().split('#')
+            _, anchor = url.url().rsplit('#', 1)
         except ValueError:
             return 
         self.scrollToAnchor(anchor)
