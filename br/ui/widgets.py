@@ -4,9 +4,10 @@ from zipfile import ZipFile
 
 from PyQt6.QtWidgets import QTextBrowser
 from PyQt6.QtCore import QTemporaryDir, QUrl
+from PyQt6.QtGui import QFont
 from ebooklib import epub
 
-from br.book_utils import get_css_content, get_html_content
+from br.book_utils import get_css_content, get_html_content, remove_font_family
 
 
 class BookReader(QTextBrowser):
@@ -17,6 +18,7 @@ class BookReader(QTextBrowser):
         self.setOpenLinks(False)
         self.setOpenExternalLinks(True)
         self.anchorClicked.connect(self.scroll_to_anchor)
+        self.document().setDefaultFont(QFont('Literata', 15))
 
     def load_book(self, book_path: str, ext_base_dir: str | None):
         self.book = epub.read_epub(book_path)
@@ -29,9 +31,11 @@ class BookReader(QTextBrowser):
                 zip.extractall(self.extract_dir)
         self.setSearchPaths([self.extract_dir])
         self.document().setDefaultStyleSheet(
-            ''.join(list(get_css_content(self.book)))
+            remove_font_family(''.join(list(get_css_content(self.book))))
         )
-        self.setHtml(''.join(list(get_html_content(self.book))))
+        self.setHtml(
+            remove_font_family(''.join(list(get_html_content(self.book))))
+        )
 
     def scroll_to_anchor(self, url: QUrl):
         try:

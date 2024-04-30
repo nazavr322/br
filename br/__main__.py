@@ -2,15 +2,25 @@ import sys
 from argparse import ArgumentParser
 
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget
-from PyQt6.QtCore import QTemporaryDir
-from PyQt6.QtGui import QCloseEvent
+from PyQt6.QtCore import QTemporaryDir, QDirIterator
+from PyQt6.QtGui import QCloseEvent, QFontDatabase
 
+import br.resources
+from br.utils import q_iter_dir
 from br.ui.widgets import BookReader
 
 
 class MainWindow(QMainWindow):
     def __init__(self, book_path: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        dir_it = q_iter_dir(
+            ':/fonts/',
+            ['*.ttf'],
+            flags=QDirIterator.IteratorFlag.Subdirectories,
+        )
+        for font_file in dir_it:
+            QFontDatabase.addApplicationFont(font_file)
 
         self.temp_dir = QTemporaryDir()
         

@@ -1,0 +1,21 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="fonts">
+        <file alias="Literata-LightItalic.ttf">resources/fonts/Literata/Literata-LightItalic.ttf</file>
+        <file alias="Literata-BoldItalic.ttf">resources/fonts/Literata/Literata-BoldItalic.ttf</file>
+        <file alias="Literata-ExtraBold.ttf">resources/fonts/Literata/Literata-ExtraBold.ttf</file>
+        <file alias="Literata-Light.ttf">resources/fonts/Literata/Literata-Light.ttf</file>
+        <file alias="Literata-ExtraBoldItalic.ttf">resources/fonts/Literata/Literata-ExtraBoldItalic.ttf</file>
+        <file alias="Literata-Bold.ttf">resources/fonts/Literata/Literata-Bold.ttf</file>
+        <file alias="Literata-SemiBold.ttf">resources/fonts/Literata/Literata-SemiBold.ttf</file>
+        <file alias="Literata-Regular.ttf">resources/fonts/Literata/Literata-Regular.ttf</file>
+        <file alias="Literata-Black.ttf">resources/fonts/Literata/Literata-Black.ttf</file>
+        <file alias="Literata-MediumItalic.ttf">resources/fonts/Literata/Literata-MediumItalic.ttf</file>
+        <file alias="Literata-BlackItalic.ttf">resources/fonts/Literata/Literata-BlackItalic.ttf</file>
+        <file alias="Literata-ExtraLight.ttf">resources/fonts/Literata/Literata-ExtraLight.ttf</file>
+        <file alias="Literata-Medium.ttf">resources/fonts/Literata/Literata-Medium.ttf</file>
+        <file alias="Literata-ExtraLightItalic.ttf">resources/fonts/Literata/Literata-ExtraLightItalic.ttf</file>
+        <file alias="Literata-Italic.ttf">resources/fonts/Literata/Literata-Italic.ttf</file>
+        <file alias="Literata-SemiBoldItalic.ttf">resources/fonts/Literata/Literata-SemiBoldItalic.ttf</file>
+    </qresource>
+</RCC>

@@ -1,3 +1,4 @@
+import re
 from collections.abc import Generator
 
 import ebooklib
@@ -17,4 +18,8 @@ def get_html_content(book: EpubBook) -> Generator[str, None, None]:
 
 def get_css_content(book: EpubBook) -> Generator[str, None, None]:
     return _get_content(book, ebooklib.ITEM_STYLE)
+
+
+def remove_font_family(s: str) -> str:
+    return re.sub(r'(?<=;|"|\s)font-family[^;]*(;)?', '', s)
 
