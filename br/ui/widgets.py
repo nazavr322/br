@@ -3,7 +3,7 @@ from hashlib import file_digest
 from zipfile import ZipFile
 
 from PyQt6.QtWidgets import QTextBrowser
-from PyQt6.QtCore import QTemporaryDir, QUrl
+from PyQt6.QtCore import QTemporaryDir, QUrl, Qt
 from PyQt6.QtGui import QFont, QTextCursor, QTextBlockFormat
 from ebooklib import epub
 
@@ -15,6 +15,7 @@ class BookReader(QTextBrowser):
         super().__init__(*args, **kwargs)
         self.book = None
         self.extract_dir = None
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setOpenLinks(False)
         self.setOpenExternalLinks(True)
         self.document().setDefaultFont(QFont('Literata', 15))
