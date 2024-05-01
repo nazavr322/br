@@ -4,7 +4,7 @@ from zipfile import ZipFile
 
 from PyQt6.QtWidgets import QTextBrowser
 from PyQt6.QtCore import QTemporaryDir, QUrl
-from PyQt6.QtGui import QFont
+from PyQt6.QtGui import QFont, QTextCursor, QTextBlockFormat
 from ebooklib import epub
 
 from br.book_utils import get_css_content, get_html_content, remove_font_family
@@ -17,9 +17,29 @@ class BookReader(QTextBrowser):
         self.extract_dir = None
         self.setOpenLinks(False)
         self.setOpenExternalLinks(True)
-        self.anchorClicked.connect(self.scroll_to_anchor)
         self.document().setDefaultFont(QFont('Literata', 15))
         self.document().setDocumentMargin(50)
+        self.anchorClicked.connect(self.scroll_to_anchor)
+
+    def _modify_block_format(
+        self,
+        line_height: float | None = None,
+        text_indent: float | None = None,
+    ):
+        assert line_height is not None or text_indent is not None
+        block_fmt = QTextBlockFormat()
+        if line_height is not None:
+            block_fmt.setLineHeight(
+                line_height,
+                QTextBlockFormat.LineHeightTypes.ProportionalHeight.value,
+            )
+        if text_indent is not None:
+            block_fmt.setTextIndent(text_indent)
+        cursor = self.textCursor()
+        cursor.clearSelection()
+        cursor.select(QTextCursor.SelectionType.Document)
+        cursor.mergeBlockFormat(block_fmt)
+        cursor.clearSelection()
 
     def load_book(self, book_path: str, ext_base_dir: str | None):
         self.book = epub.read_epub(book_path)
@@ -37,6 +57,7 @@ class BookReader(QTextBrowser):
         self.setHtml(
             remove_font_family(''.join(list(get_html_content(self.book))))
         )
+        self._modify_block_format(150, 50)
 
     def scroll_to_anchor(self, url: QUrl):
         try:
