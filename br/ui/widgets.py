@@ -19,6 +19,7 @@ class BookReader(QTextBrowser):
         self.setOpenExternalLinks(True)
         self.anchorClicked.connect(self.scroll_to_anchor)
         self.document().setDefaultFont(QFont('Literata', 15))
+        self.document().setDocumentMargin(50)
 
     def load_book(self, book_path: str, ext_base_dir: str | None):
         self.book = epub.read_epub(book_path)
