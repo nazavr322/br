@@ -4,7 +4,9 @@ from zipfile import ZipFile
 
 from PyQt6.QtWidgets import QTextBrowser
 from PyQt6.QtCore import QTemporaryDir, QUrl, Qt
-from PyQt6.QtGui import QFont, QTextCursor, QTextBlockFormat
+from PyQt6.QtGui import (
+    QFont, QTextCursor, QTextBlockFormat, QContextMenuEvent, QAction
+)
 from ebooklib import epub
 
 from br.book_utils import get_css_content, get_html_content, remove_font_family
@@ -15,12 +17,18 @@ class BookReader(QTextBrowser):
         super().__init__(*args, **kwargs)
         self.book = None
         self.extract_dir = None
+
+        self.gi_action = QAction('Generate Illustration', self)
+        self.set_gi_action_enabled(False)
+
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setOpenLinks(False)
         self.setOpenExternalLinks(True)
         self.setFont(QFont('Literata', 15))
         self.document().setDocumentMargin(50)
+
         self.anchorClicked.connect(self.scroll_to_anchor)
+        self.copyAvailable.connect(self.set_gi_action_enabled)
 
     def _modify_block_format(
         self,
@@ -66,4 +74,15 @@ class BookReader(QTextBrowser):
         except ValueError:
             return 
         self.scrollToAnchor(anchor)
+
+    def contextMenuEvent(self, e: QContextMenuEvent | None) -> None:
+        scroll_pos = e.pos()
+        scroll_pos.setX(scroll_pos.x() + self.horizontalScrollBar().value())
+        scroll_pos.setY(scroll_pos.y() + self.verticalScrollBar().value())
+        menu = self.createStandardContextMenu(scroll_pos)
+        menu.addAction(self.gi_action)
+        menu.exec(e.globalPos())
+
+    def set_gi_action_enabled(self, enabled: bool):
+        self.gi_action.setEnabled(enabled)
 
