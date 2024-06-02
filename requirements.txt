@@ -1,6 +1,11 @@
+certifi==2024.2.2
+charset-normalizer==3.3.2
 EbookLib==0.18
+idna==3.7
 lxml==5.2.1
 PyQt6==6.7.0
 PyQt6-Qt6==6.7.0
 PyQt6-sip==13.6.0
+requests==2.32.2
 six==1.16.0
+urllib3==2.2.1
