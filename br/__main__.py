@@ -2,7 +2,7 @@ import sys
 from argparse import ArgumentParser
 
 from PyQt6.QtWidgets import (
-    QApplication, QMainWindow, QVBoxLayout, QWidget, QStatusBar, QLabel
+    QApplication, QMainWindow, QHBoxLayout, QWidget, QStatusBar, QLabel
 )
 from PyQt6.QtCore import QTemporaryDir, QDirIterator
 from PyQt6.QtGui import QCloseEvent, QFontDatabase
@@ -26,15 +26,17 @@ class MainWindow(QMainWindow):
 
         self.temp_dir = QTemporaryDir()
         
-        main_layout = QVBoxLayout()
-        main_layout.setContentsMargins(0, 0, 0, 0)
+        self.main_layout = QHBoxLayout()
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
 
+        screen_width = QApplication.primaryScreen().availableSize().width()
         self.book_reader = BookReader()
         self.book_reader.load_book(book_path, self.temp_dir.path())
+        self.book_reader.setMaximumWidth(screen_width // 2)
+        self.main_layout.addWidget(self.book_reader)
         self.setWindowTitle(
             f'{QApplication.applicationName()} - {self.book_reader.book.title}'
         )
-        main_layout.addWidget(self.book_reader)
 
         status_bar = QStatusBar()
         status_bar.setSizeGripEnabled(False)
@@ -52,7 +54,7 @@ class MainWindow(QMainWindow):
         self.setStatusBar(status_bar)
 
         main_widget = QWidget()
-        main_widget.setLayout(main_layout)
+        main_widget.setLayout(self.main_layout)
         self.setCentralWidget(main_widget)
 
     def _update_book_prog_label(self, new_value: int):
@@ -63,7 +65,7 @@ class MainWindow(QMainWindow):
         except Exception:
             p = 0
         self.book_progress_label.setNum(p)
-    
+
     def closeEvent(self, event: QCloseEvent | None):
         self.temp_dir.remove()
         super().closeEvent(event)
