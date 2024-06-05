@@ -21,6 +21,7 @@ from PyQt6.QtWidgets import (
     QSlider,
     QSpinBox,
     QTabWidget,
+    QApplication,
 )
 from PyQt6.QtCore import QTemporaryDir, QUrl, Qt, QThreadPool, QObject
 from PyQt6.QtGui import (
@@ -147,6 +148,9 @@ class GenerationParamsBox(QGroupBox):
 class GIDialog(QDialog):
     def __init__(self, pos_prompt: str, neg_prompt: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.setWindowTitle(
+            f'{QApplication.applicationName()} - Configure Illustration'
+        )
 
         self._backend = SdWebUIBackend(port=SD_WEBUI_API_PORT)
  

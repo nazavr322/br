@@ -29,6 +29,9 @@ class MainWindow(QMainWindow):
 
         self.book_reader = BookReader()
         self.book_reader.load_book(book_path, self.temp_dir.path())
+        self.setWindowTitle(
+            f'{QApplication.applicationName()} - {self.book_reader.book.title}'
+        )
         main_layout.addWidget(self.book_reader)
 
         main_widget = QWidget()
