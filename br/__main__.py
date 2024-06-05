@@ -1,13 +1,15 @@
 import sys
 from argparse import ArgumentParser
 
-from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import (
+    QApplication, QMainWindow, QVBoxLayout, QWidget, QStatusBar, QLabel
+)
 from PyQt6.QtCore import QTemporaryDir, QDirIterator
 from PyQt6.QtGui import QCloseEvent, QFontDatabase
 
 import br.resources
 from br.utils import q_iter_dir
-from br.ui.widgets import BookReader
+from br.ui.widgets import BookReader, DecoratedLabel
 
 
 class MainWindow(QMainWindow):
@@ -34,9 +36,33 @@ class MainWindow(QMainWindow):
         )
         main_layout.addWidget(self.book_reader)
 
+        status_bar = QStatusBar()
+        status_bar.setSizeGripEnabled(False)
+        status_bar.addWidget(QLabel(self.book_reader.book.title))
+        self.book_progress_label = DecoratedLabel(
+            prefix='Progress: ', postfix=' %'
+        )
+        self._update_book_prog_label(
+            self.book_reader.verticalScrollBar().value()
+        )
+        self.book_reader.verticalScrollBar().valueChanged.connect(
+            self._update_book_prog_label
+        )
+        status_bar.addPermanentWidget(self.book_progress_label)
+        self.setStatusBar(status_bar)
+
         main_widget = QWidget()
         main_widget.setLayout(main_layout)
         self.setCentralWidget(main_widget)
+
+    def _update_book_prog_label(self, new_value: int):
+        try:
+            p = int(
+                new_value / self.book_reader.verticalScrollBar().maximum() * 100
+            )
+        except Exception:
+            p = 0
+        self.book_progress_label.setNum(p)
     
     def closeEvent(self, event: QCloseEvent | None):
         self.temp_dir.remove()

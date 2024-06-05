@@ -22,6 +22,7 @@ from PyQt6.QtWidgets import (
     QSpinBox,
     QTabWidget,
     QApplication,
+    QLabel,
 )
 from PyQt6.QtCore import QTemporaryDir, QUrl, Qt, QThreadPool, QObject
 from PyQt6.QtGui import (
@@ -380,4 +381,28 @@ class BookReader(QTextBrowser):
             )
             worker.signals.result.connect(self.handle_illustration)
             self.thread_pool.start(worker)
+
+
+class DecoratedLabel(QLabel):
+    def __init__(self, *args, prefix: str = '', postfix: str = '', **kwargs):
+        super().__init__(*args, **kwargs)
+        self._prefix = prefix
+        self._postfix = postfix
+
+    @property
+    def prefix(self) -> str:
+        return self._prefix
+
+    @property
+    def postfix(self) -> str:
+        return self._postfix
+
+    def setText(self, a0: str | None):
+        if a0:
+            super().setText(f'{self._prefix}{a0}{self._postfix}')
+        else:
+            super().setText(a0)
+    
+    def setNum(self, a0: int | float):
+        self.setText(str(a0))
 
