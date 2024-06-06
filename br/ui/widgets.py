@@ -26,7 +26,6 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import QTemporaryDir, QUrl, Qt, QThreadPool, QObject
 from PyQt6.QtGui import (
-    QFont,
     QTextCursor,
     QTextBlockFormat,
     QContextMenuEvent,
@@ -253,7 +252,6 @@ class BookReader(QTextBrowser):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setOpenLinks(False)
         self.setOpenExternalLinks(True)
-        self.setFont(QFont('Literata', 15))
         self.document().setDocumentMargin(50)
 
         self.anchorClicked.connect(self.scroll_to_anchor)

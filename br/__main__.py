@@ -2,14 +2,25 @@ import sys
 from argparse import ArgumentParser
 
 from PyQt6.QtWidgets import (
-    QApplication, QMainWindow, QHBoxLayout, QWidget, QStatusBar, QLabel
+    QApplication,
+    QMainWindow,
+    QHBoxLayout,
+    QWidget,
+    QStatusBar,
+    QLabel,
+    QToolBar,
+    QFontComboBox,
+    QSizePolicy,
 )
-from PyQt6.QtCore import QTemporaryDir, QDirIterator
-from PyQt6.QtGui import QCloseEvent, QFontDatabase
+from PyQt6.QtCore import QTemporaryDir, QDirIterator, Qt
+from PyQt6.QtGui import QCloseEvent, QFontDatabase, QFont
 
 import br.resources
 from br.utils import q_iter_dir
 from br.ui.widgets import BookReader, DecoratedLabel
+
+
+DEFAULT_BOOK_FONT = 'Literata'
 
 
 class MainWindow(QMainWindow):
@@ -38,6 +49,20 @@ class MainWindow(QMainWindow):
             f'{QApplication.applicationName()} - {self.book_reader.book.title}'
         )
 
+        font_cbox = QFontComboBox()
+        font_cbox.setFontFilters(QFontComboBox.FontFilter.ScalableFonts)
+        font_cbox.setEditable(False)
+        font_cbox.currentFontChanged.connect(self.book_reader.setFont)
+        font_cbox.setCurrentFont(QFont(DEFAULT_BOOK_FONT))
+
+        tool_bar = QToolBar('Toolbar')
+        tool_bar.setContextMenuPolicy(Qt.ContextMenuPolicy.PreventContextMenu)
+        tool_bar.setMovable(False)
+        tool_bar.addWidget(self._create_spacer())
+        tool_bar.addWidget(font_cbox)
+        tool_bar.addWidget(self._create_spacer())
+        self.addToolBar(tool_bar)
+
         status_bar = QStatusBar()
         status_bar.setSizeGripEnabled(False)
         status_bar.addWidget(QLabel(self.book_reader.book.title))
@@ -56,7 +81,7 @@ class MainWindow(QMainWindow):
         main_widget = QWidget()
         main_widget.setLayout(self.main_layout)
         self.setCentralWidget(main_widget)
-
+    
     def _update_book_prog_label(self, new_value: int):
         try:
             p = int(
@@ -65,6 +90,19 @@ class MainWindow(QMainWindow):
         except Exception:
             p = 0
         self.book_progress_label.setNum(p)
+
+    def _create_spacer(
+        self,
+        hor_policy: QSizePolicy.Policy | None = None,
+        ver_policy: QSizePolicy.Policy | None = None,
+    ) -> QWidget:
+        if hor_policy is None:
+            hor_policy =  QSizePolicy.Policy.Expanding
+        if ver_policy is None:
+            ver_policy =  QSizePolicy.Policy.Preferred
+        spacer = QWidget()
+        spacer.setSizePolicy(hor_policy, ver_policy)
+        return spacer
 
     def closeEvent(self, event: QCloseEvent | None):
         self.temp_dir.remove()
