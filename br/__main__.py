@@ -102,7 +102,7 @@ class MainWindow(QMainWindow):
         status_bar.setSizeGripEnabled(False)
         status_bar.addWidget(QLabel(self.book_reader.book.title))
         self.book_progress_label = DecoratedLabel(
-            prefix='Progress: ', postfix=' %'
+            prefix='Progress: ', suffix=' %'
         )
         self._update_book_prog_label(
             self.book_reader.verticalScrollBar().value()

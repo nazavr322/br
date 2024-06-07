@@ -394,22 +394,22 @@ class BookReader(QTextBrowser):
 
 
 class DecoratedLabel(QLabel):
-    def __init__(self, *args, prefix: str = '', postfix: str = '', **kwargs):
+    def __init__(self, *args, prefix: str = '', suffix: str = '', **kwargs):
         super().__init__(*args, **kwargs)
         self._prefix = prefix
-        self._postfix = postfix
+        self._suffix = suffix
 
     @property
     def prefix(self) -> str:
         return self._prefix
 
     @property
-    def postfix(self) -> str:
-        return self._postfix
+    def suffix(self) -> str:
+        return self._suffix
 
     def setText(self, a0: str | None):
         if a0:
-            super().setText(f'{self._prefix}{a0}{self._postfix}')
+            super().setText(f'{self._prefix}{a0}{self._suffix}')
         else:
             super().setText(a0)
     
