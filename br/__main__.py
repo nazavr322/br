@@ -116,6 +116,8 @@ class MainWindow(QMainWindow):
         main_widget = QWidget()
         main_widget.setLayout(self.main_layout)
         self.setCentralWidget(main_widget)
+
+        self.book_reader.setFocus()
     
     def _update_book_prog_label(self, new_value: int):
         try:
