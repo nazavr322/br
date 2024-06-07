@@ -17,10 +17,36 @@ from PyQt6.QtGui import QCloseEvent, QFontDatabase, QFont
 
 import br.resources
 from br.utils import q_iter_dir
-from br.ui.widgets import BookReader, DecoratedLabel
+from br.ui.widgets import BookReader, DecoratedLabel, DecoratedComboBox
 
 
 DEFAULT_BOOK_FONT = 'Literata'
+FONT_SIZES = [
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    18,
+    20,
+    22,
+    24,
+    28,
+    30,
+    36,
+    40,
+    48,
+    54,
+    60,
+    72,
+    88,
+    96,
+]
+DEFAULT_BOOK_FONT_SIZE = 13
 
 
 class MainWindow(QMainWindow):
@@ -52,14 +78,23 @@ class MainWindow(QMainWindow):
         font_cbox = QFontComboBox()
         font_cbox.setFontFilters(QFontComboBox.FontFilter.ScalableFonts)
         font_cbox.setEditable(False)
-        font_cbox.currentFontChanged.connect(self.book_reader.setFont)
+        font_cbox.currentFontChanged.connect(self.book_reader.setDocFont)
         font_cbox.setCurrentFont(QFont(DEFAULT_BOOK_FONT))
+
+        font_size_cbox = DecoratedComboBox(FONT_SIZES, suffix=' pt')
+        font_size_cbox.currentTextChangedUndec.connect(
+            self._upd_book_reader_font_size
+        )
+        font_size_cbox.setCurrentIndex(
+            FONT_SIZES.index(DEFAULT_BOOK_FONT_SIZE)
+        )
 
         tool_bar = QToolBar('Toolbar')
         tool_bar.setContextMenuPolicy(Qt.ContextMenuPolicy.PreventContextMenu)
         tool_bar.setMovable(False)
         tool_bar.addWidget(self._create_spacer())
         tool_bar.addWidget(font_cbox)
+        tool_bar.addWidget(font_size_cbox)
         tool_bar.addWidget(self._create_spacer())
         self.addToolBar(tool_bar)
 
@@ -103,6 +138,9 @@ class MainWindow(QMainWindow):
         spacer = QWidget()
         spacer.setSizePolicy(hor_policy, ver_policy)
         return spacer
+
+    def _upd_book_reader_font_size(self, size_str: str):
+        self.book_reader.setDocFontPointSize(int(size_str))
 
     def closeEvent(self, event: QCloseEvent | None):
         self.temp_dir.remove()

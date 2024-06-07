@@ -24,7 +24,9 @@ from PyQt6.QtWidgets import (
     QApplication,
     QLabel,
 )
-from PyQt6.QtCore import QTemporaryDir, QUrl, Qt, QThreadPool, QObject
+from PyQt6.QtCore import (
+    QTemporaryDir, QUrl, Qt, QThreadPool, QObject, pyqtSignal
+)
 from PyQt6.QtGui import (
     QTextCursor,
     QTextBlockFormat,
@@ -33,6 +35,7 @@ from PyQt6.QtGui import (
     QPixmap,
     QTextDocument,
     QTextImageFormat,
+    QFont,
 )
 from ebooklib import epub
 
@@ -380,6 +383,15 @@ class BookReader(QTextBrowser):
             worker.signals.result.connect(self.handle_illustration)
             self.thread_pool.start(worker)
 
+    def setDocFont(self, new_font: QFont):
+        font = new_font.resolve(self.document().defaultFont())
+        self.document().setDefaultFont(font)
+
+    def setDocFontPointSize(self, new_size: int):
+        font = self.document().defaultFont()
+        font.setPointSize(new_size)
+        self.document().setDefaultFont(font)
+
 
 class DecoratedLabel(QLabel):
     def __init__(self, *args, prefix: str = '', postfix: str = '', **kwargs):
@@ -403,4 +415,36 @@ class DecoratedLabel(QLabel):
     
     def setNum(self, a0: int | float):
         self.setText(str(a0))
+
+
+class DecoratedComboBox(QComboBox):
+    currentTextChangedUndec = pyqtSignal(str)
+
+    def __init__(
+        self,
+        options: Iterable,
+        *args,
+        prefix: str = '',
+        suffix: str = '',
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+        self._prefix = prefix
+        self._suffix = suffix
+        for opt in options:
+            self.addItem(f'{self._prefix}{opt}{self._suffix}')
+        self.currentTextChanged.connect(self.on_current_text_changed)
+
+    @property
+    def prefix(self) -> str:
+        return self._prefix
+
+    @property
+    def suffix(self) -> str:
+        return self._suffix
+    
+    def on_current_text_changed(self, text: str):
+        self.currentTextChangedUndec.emit(
+            text.removeprefix(self._prefix).removesuffix(self._suffix)
+        )
 
