@@ -47,6 +47,7 @@ FONT_SIZES = [
     96,
 ]
 DEFAULT_BOOK_FONT_SIZE = 13
+DEFAULT_BOOK_WIDTH_FACTOR = 0.75
 
 
 class MainWindow(QMainWindow):
@@ -69,7 +70,9 @@ class MainWindow(QMainWindow):
         screen_width = QApplication.primaryScreen().availableSize().width()
         self.book_reader = BookReader()
         self.book_reader.load_book(book_path, self.temp_dir.path())
-        self.book_reader.setMaximumWidth(screen_width // 2)
+        self.book_reader.setMaximumWidth(
+            round(screen_width * DEFAULT_BOOK_WIDTH_FACTOR)
+        )
         self.main_layout.addWidget(self.book_reader)
         self.setWindowTitle(
             f'{QApplication.applicationName()} - {self.book_reader.book.title}'
