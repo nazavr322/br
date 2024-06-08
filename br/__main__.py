@@ -21,6 +21,8 @@ from br.ui.widgets import BookReader, DecoratedLabel, DecoratedComboBox
 
 
 DEFAULT_BOOK_FONT = 'Literata'
+DEFAULT_BOOK_FONT_SIZE = 15
+DEFAULT_BOOK_WIDTH_FACTOR = 0.75
 FONT_SIZES = [
     8,
     9,
@@ -46,8 +48,6 @@ FONT_SIZES = [
     88,
     96,
 ]
-DEFAULT_BOOK_FONT_SIZE = 13
-DEFAULT_BOOK_WIDTH_FACTOR = 0.75
 
 
 class MainWindow(QMainWindow):
