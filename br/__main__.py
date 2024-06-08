@@ -14,10 +14,14 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import QTemporaryDir, QDirIterator, Qt
 from PyQt6.QtGui import QCloseEvent, QFontDatabase, QFont
+from dotenv import load_dotenv
 
 import br.resources
 from br.utils import q_iter_dir
 from br.ui.widgets import BookReader, DecoratedLabel, DecoratedComboBox
+
+
+load_dotenv()
 
 
 DEFAULT_BOOK_FONT = 'Literata'

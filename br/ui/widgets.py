@@ -54,7 +54,6 @@ from br.ui.multithreading import Worker
 CAPTION_TEMPLATE = '<br><i><small>{}</small></i>'
 ILL_MAX_DIM = 768
 NEG_PROMPT = """lowres, text, error, cropped, worst quality, low quality, jpeg artifacts, ugly, duplicate, morbid, mutilated, out of frame, extra fingers, mutated hands, poorly drawn hands, poorly drawn face, mutation, deformed, blurry, bad anatomy, bad proportions, extra limbs, cloned face, disfigured, gross proportions, malformed limbs, missing arms, missing legs, extra arms, extra legs, fused fingers, too many fingers, long neck, username, watermark, signature"""
-SD_WEBUI_API_PORT = 7861
 
 
 class QMeta(ABCMeta, type(QObject)):
@@ -155,7 +154,8 @@ class GIDialog(QDialog):
             f'{QApplication.applicationName()} - Configure Illustration'
         )
 
-        self._backend = SdWebUIBackend(port=SD_WEBUI_API_PORT)
+        sd_webui_api_port = int(os.environ['SD_WEB_UI_API_PORT'])
+        self._backend = SdWebUIBackend(port=sd_webui_api_port)
  
         controls_layout = QHBoxLayout()
         controls_layout.setContentsMargins(0, 0, 0, 0)
