@@ -81,7 +81,7 @@ class MainWindow(QMainWindow):
         font_cbox = QFontComboBox()
         font_cbox.setFontFilters(QFontComboBox.FontFilter.ScalableFonts)
         font_cbox.setEditable(False)
-        font_cbox.currentFontChanged.connect(self.book_reader.setDocFont)
+        font_cbox.currentFontChanged.connect(self.book_reader.set_font)
         font_cbox.setCurrentFont(QFont(DEFAULT_BOOK_FONT))
 
         font_size_cbox = DecoratedComboBox(FONT_SIZES, suffix=' pt')
@@ -145,7 +145,7 @@ class MainWindow(QMainWindow):
         return spacer
 
     def _upd_book_reader_font_size(self, size_str: str):
-        self.book_reader.setDocFontPointSize(int(size_str))
+        self.book_reader.set_font_pt_size(int(size_str))
 
     def closeEvent(self, event: QCloseEvent | None):
         self.temp_dir.remove()

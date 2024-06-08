@@ -383,14 +383,15 @@ class BookReader(QTextBrowser):
             worker.signals.result.connect(self.handle_illustration)
             self.thread_pool.start(worker)
 
-    def setDocFont(self, new_font: QFont):
-        font = new_font.resolve(self.document().defaultFont())
-        self.document().setDefaultFont(font)
+    def set_font(self, new_font: QFont):
+        font = self.font()
+        font.setFamily(new_font.family())
+        self.setFont(font)
 
-    def setDocFontPointSize(self, new_size: int):
-        font = self.document().defaultFont()
+    def set_font_pt_size(self, new_size: int):
+        font = self.font()
         font.setPointSize(new_size)
-        self.document().setDefaultFont(font)
+        self.setFont(font)
 
 
 class DecoratedLabel(QLabel):
