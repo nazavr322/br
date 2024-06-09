@@ -6,6 +6,7 @@ from zipfile import ZipFile
 from base64 import b64decode
 from abc import ABCMeta, ABC, abstractmethod
 from typing import Iterable, Any
+from functools import partial
 
 from PyQt6.QtWidgets import (
     QTextBrowser,
@@ -23,6 +24,7 @@ from PyQt6.QtWidgets import (
     QTabWidget,
     QApplication,
     QLabel,
+    QStackedLayout,
 )
 from PyQt6.QtCore import (
     QTemporaryDir, QUrl, Qt, QThreadPool, QObject, pyqtSignal
@@ -47,7 +49,10 @@ from br.ui.utils import (
     Illustration,
     scale_to_largest,
 )
-from br.imagen.backends import SdWebUIBackend, GenerationParamType
+from br.imagen.backends import (
+    SdWebUIBackend, GenerationParamType, OpenAIBackend
+)
+from br.imagen.backends.base import ImagenBackend
 from br.ui.multithreading import Worker
 
 
@@ -147,48 +152,55 @@ class GenerationParamsBox(QGroupBox):
         ).widget()
 
 
+class PromptEditor(QPlainTextEdit):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setFont(QFont('Monospace', 10))
+
+
 class GIDialog(QDialog):
     def __init__(self, pos_prompt: str, neg_prompt: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setWindowTitle(
             f'{QApplication.applicationName()} - Configure Illustration'
         )
+        self._backend_factory = {
+            'Stable Diffusion WebUI': partial(
+                SdWebUIBackend,
+                os.environ['SD_WEB_UI_API_HOST'],
+                int(os.environ['SD_WEB_UI_API_PORT']),
+            ),
+            'OpenAI': OpenAIBackend,
+        }
+        self._backends: list[ImagenBackend | None] = [
+            None for _ in self._backend_factory
+        ]
 
-        sd_webui_api_port = int(os.environ['SD_WEB_UI_API_PORT'])
-        self._backend = SdWebUIBackend(port=sd_webui_api_port)
- 
+        main_layout = QVBoxLayout()
         controls_layout = QHBoxLayout()
         controls_layout.setContentsMargins(0, 0, 0, 0)
+        left_panel_layout = QVBoxLayout()
+        left_panel_layout.setContentsMargins(0, 0, 0, 0)
 
-        self.generation_params_box = GenerationParamsBox(
-            'Generation Parameters', self
+        left_panel_layout.addWidget(QLabel('Backend'))
+        self.backend_cbox = QComboBox()
+        self.backend_cbox.addItems(self._backend_factory)
+        self.backend_cbox.currentIndexChanged.connect(
+            self._on_backend_cbox_change
         )
-        self.generation_params_box.add_param(
-            GenerationParamType.COMBO_BOX, 'Model', self._backend.list_models()
-        )
-        for dim in ('Width', 'Height'):
-            self.generation_params_box.add_param(
-                GenerationParamType.INT_NUMBER,
-                f'Illustration {dim}',
-                min_value=256,
-                max_value=2048,
-                init_value=1024,
-            )
-        for param in self.backend.generation_params.values():
-            self.generation_params_box.add_param(
-                param['type'], param['display_name'], **param['params']
-            )
-        controls_layout.addWidget(self.generation_params_box)
+        left_panel_layout.addWidget(self.backend_cbox)
 
-        self.pos_prompt_ed = QPlainTextEdit(pos_prompt)
-        self.neg_prompt_ed = QPlainTextEdit(neg_prompt)
+        self.generation_params_box_layout = QStackedLayout()
+        left_panel_layout.addLayout(self.generation_params_box_layout)
+        controls_layout.addLayout(left_panel_layout)
+
+        self.pos_prompt_ed = PromptEditor(pos_prompt)
+        self.neg_prompt_ed = PromptEditor(neg_prompt)
         self.prompt_tabs = QTabWidget(self)
+        self.prompt_tabs.setUsesScrollButtons(False)
         self.prompt_tabs.addTab(self.pos_prompt_ed, 'Positive Prompt')
         self.prompt_tabs.addTab(self.neg_prompt_ed, 'Negative Prompt')
         controls_layout.addWidget(self.prompt_tabs)
-
-        main_layout = QVBoxLayout()
-        main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.addLayout(controls_layout)
 
         self.button_box = QDialogButtonBox(
@@ -203,11 +215,17 @@ class GIDialog(QDialog):
 
         self.setLayout(main_layout)
 
+        self._on_backend_cbox_change(0)
+
     def _get_param_value(self, label: str):
         param = self.generation_params_box.fieldForLabel(label)
         if param is None:
             raise RuntimeError(f"Parameter '{label}' is missing")
         return param.param_value()
+
+    @property
+    def generation_params_box(self) -> GenerationParamsBox:
+        return self.generation_params_box_layout.currentWidget()
 
     @property
     def pos_prompt(self) -> str:
@@ -218,20 +236,8 @@ class GIDialog(QDialog):
         return self.neg_prompt_ed.toPlainText()
 
     @property
-    def backend(self) -> SdWebUIBackend:
-        return self._backend
-
-    @property
-    def model_name(self) -> str:
-        return self._get_param_value('Model')
-
-    @property
-    def ill_width(self) -> int:
-        return self._get_param_value('Illustration Width')
-
-    @property
-    def ill_height(self) -> int:
-        return self._get_param_value('Illustration Height')
+    def backend(self) -> ImagenBackend:
+        return self._backends[self.backend_cbox.currentIndex()]
 
     @property
     def generation_params(self) -> dict[str, Any]:
@@ -239,6 +245,23 @@ class GIDialog(QDialog):
             name: self._get_param_value(param['display_name'])
             for name, param in self.backend.generation_params.items()
         }
+    
+    def _on_backend_cbox_change(self, idx: int):
+        backend = self._backends[idx] 
+        if backend is None:
+            backend = self._backend_factory[self.backend_cbox.currentText()]()
+            self._backends[idx] = backend
+            gen_params_box = GenerationParamsBox('Generation Parameters')
+            for param in backend.generation_params.values():
+                gen_params_box.add_param(
+                    param['type'], param['display_name'], **param['params']
+                )
+            self.generation_params_box_layout.addWidget(gen_params_box)
+        self.generation_params_box_layout.setCurrentIndex(idx)
+        self.prompt_tabs.setTabEnabled(
+            self.prompt_tabs.indexOf(self.neg_prompt_ed),
+            backend.supports_neg_prompt,
+        )
 
 
 class BookReader(QTextBrowser):
@@ -346,12 +369,17 @@ class BookReader(QTextBrowser):
 
     def handle_illustration(self, ill: Illustration):
         img = QPixmap()
-        img.loadFromData(b64decode(ill.img_data))
+        img_data = b64decode(ill.img_data)
+        img.loadFromData(img_data)
+        with open('test.png', 'wb') as f:
+            f.write(img_data)
         img_id = QUrl(uuid4().hex)
         self.document().addResource(
             QTextDocument.ResourceType.ImageResource.value, img_id, img
         )
-        ill_w, ill_h = scale_to_largest(img, ILL_MAX_DIM)
+        ill_w, ill_h = img.width(), img.height()
+        if ill_w > ILL_MAX_DIM or ill_h > ILL_MAX_DIM:
+            ill_w, ill_h = scale_to_largest(ill_w, ill_h, ILL_MAX_DIM)
         self.textCursor().clearSelection()
         cursor = self._move_cursor_to_block_n(ill.block_num)
         cursor.movePosition(cursor.MoveOperation.EndOfBlock)
@@ -373,11 +401,8 @@ class BookReader(QTextBrowser):
                 )
             worker = Worker(
                 generate_illustration,
-                dlg.model_name,
-                dlg.pos_prompt,
-                dlg.neg_prompt,
-                dlg.ill_width,
-                dlg.ill_height,
+                pos_prompt=dlg.pos_prompt,
+                neg_prompt=dlg.neg_prompt,
                 **dlg.generation_params,
             )
             worker.signals.result.connect(self.handle_illustration)

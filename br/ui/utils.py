@@ -35,10 +35,7 @@ def truncate_str(s: str, l: int = 79, trun_char: str = '...') -> str:
     return s[:l - len(trun_char)] + trun_char if len(s) > l else s
 
 
-def scale_to_largest(
-    img: QImage | QPixmap, largest_side: int
-) -> tuple[int, int]:
-    w, h = img.width(), img.height()
+def scale_to_largest(w: int, h: int, largest_side: int) -> tuple[int, int]:
     if w > h:
         scale = largest_side / w
     else:

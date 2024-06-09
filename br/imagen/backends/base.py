@@ -24,13 +24,13 @@ class ImagenBackend(ABC):
         self,
         model_name: str,
         pos_prompt: str,
-        neg_prompt: str,
-        width: int,
-        height: int,
-        **kwargs,
+        width: int | str,
+        height: int | str,
+        neg_prompt: str | None,
     ) -> str:
         ...
 
-    @abstractmethod
-    def list_models(self) -> list[str]: ...
+    @property
+    def supports_neg_prompt(self) -> bool:
+        return True
 
